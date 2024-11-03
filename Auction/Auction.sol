@@ -107,10 +107,14 @@ contract Auction1 is ERC721URIStorage,Ownable {
          require(msg.sender == auc.seller,"Address is not true");
          require(block.timestamp >= auc.endTime,"Auction is not finished");
          require(!auc.ended,"set finish");
-         auc.ended = true;
-         emit AuctionEnded(tokenid,auc.highestBidder,auc.highestBid,auc.trueBid);
-         _transfer(auc.seller, auc.highestBidder, tokenid);
-         (bool success,) = auc.seller.call{value : auc.trueBid}("");
-         require(success,"transfer is failed");
+         if (auc.trueBid == 0) {
+            auc.ended = true;
+         }else {
+            auc.ended = true;
+            emit AuctionEnded(tokenid,auc.highestBidder,auc.highestBid,auc.trueBid);
+            _transfer(auc.seller, auc.highestBidder, tokenid);
+            (bool success,) = auc.seller.call{value : auc.trueBid}("");
+            require(success,"transfer is failed");
+         }
     }
 }
